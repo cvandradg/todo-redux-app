@@ -1,62 +1,63 @@
 import { createReducer, on } from '@ngrx/store';
-import { crear, toggle, editar, borrar, toggleAll } from './todos.actions';
+import { crear, toggle, editar, borrar, toggleAll, limpiar } from './todos.actions';
 import { Todo } from './models/todo.model';
 
-export const initialState: Todo[] = [
-  new Todo('Salvar al mundo'),
-  new Todo('Salvar al mundo2'),
-  new Todo('Salvar al mundo3'),
-  new Todo('Salvar al mundo4'),
 
+export const estadoInicial: Todo[] = [
+    new Todo('Salvar al mundo'),
+    new Todo('Vencer a Thanos'),
+    new Todo('Comprar traje de Ironman'),
+    new Todo('Robar escudo del Capitán América'),
 ];
 
-const _todoReducer = createReducer(initialState,
-  on(crear, (state, {text}) => [...state, new Todo( text )]),
+const _todoReducer = createReducer(estadoInicial,
+  on( crear, (state, { text }) => [...state, new Todo( text )  ] ),
+  on( limpiar, state => state.filter(todo => !todo.completado)),
+  on ( borrar, ( state, { id } ) =>  state.filter( todo => todo.id !== id ) ),
+  
+  on ( toggleAll, ( state, { completado } ) => state.map( todo => {
 
-  on(borrar, ( state , { id }) => state.filter( todo => todo.id !== id)),
-
-  on(toggleAll, ( state , { status }) => state.map( todo => {
     return {
       ...todo,
-      compleado: status
-    };
-  })),
+      completado: completado
+    }
 
-  on(toggle, (state, {id}) => {
+  }) ) ,
+
+  on(toggle, (state, { id }) => {
+    
     return state.map( todo => {
 
-      if (todo.id === id) {
-
-        const todoResult = {
+      if ( todo.id === id  ) {
+        return {
           ...todo,
           completado: !todo.completado
         }
-
-        return todoResult
+      } else {
+        return todo;
       }
-
-      return todo;
 
     });
   }),
-  on(editar, (state, {id, text}) => {
+
+  on(editar, (state, { id, text }) => {
+    
     return state.map( todo => {
 
-      if (todo.id === id) {
+      if ( todo.id === id  ) {
         return {
           ...todo,
-          text
-        };
+          text: text
+        }
+      } else {
+        return todo;
       }
-
-      return todo;
 
     });
   }),
+
 );
 
 export function todoReducer(state, action) {
   return _todoReducer(state, action);
 }
-
-
